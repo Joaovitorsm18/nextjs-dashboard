@@ -7,6 +7,9 @@ import {
   LatestInvoiceRaw,
   User,
   Revenue,
+  CondominiosTable,
+  CondominioField,
+  CondominioForm,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -60,6 +63,7 @@ export async function fetchCardData() {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
+    const condominioCountPromise = sql`SELECT COUNT(*) FROM condominios`;
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -68,17 +72,19 @@ export async function fetchCardData() {
          FROM invoices`;
 
     const data = await Promise.all([
+      condominioCountPromise,
       invoiceCountPromise,
       customerCountPromise,
       invoiceStatusPromise,
     ]);
-
-    const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
+    const numberOfCondominios = Number(data[0].rows[0].count ?? '0');
+    const numberOfInvoices = Number(data[1].rows[0].count ?? '0');
+    const numberOfCustomers = Number(data[2].rows[0].count ?? '0');
+    const totalPaidInvoices = formatCurrency(data[3].rows[0].paid ?? '0');
+    const totalPendingInvoices = formatCurrency(data[3].rows[0].pending ?? '0');
 
     return {
+      numberOfCondominios,
       numberOfCustomers,
       numberOfInvoices,
       totalPaidInvoices,
@@ -227,4 +233,81 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
+export async function fetchCondominios() {
+  try {
+    const data = await sql<CondominioField>`
+      SELECT
+        id,
+        nome
+      FROM condominios
+      ORDER BY nome ASC
+    `;
 
+    const condominios = data.rows;
+    return condominios;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all condominioooos.');
+  }
+}
+
+const ITEMS_PER_PAGE_CONDOMINIOS = 6;
+export async function fetchFilteredCondominiums(query: string, currentPage: number) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE_CONDOMINIOS;
+
+  try {
+    const data = await sql`
+      SELECT
+        condominios.id,
+        condominios.nome,
+        condominios.apartamentos,
+        condominios.lojas,
+        (LENGTH(condominios.apartamentos) - LENGTH(REPLACE(condominios.apartamentos, ',', '')) + 1) AS total_apartamentos,
+        (LENGTH(condominios.lojas) - LENGTH(REPLACE(condominios.lojas, ',', '')) + 1) AS total_lojas,
+        COUNT(condominios.id) OVER() AS total_condominios
+      FROM condominios
+      WHERE
+        condominios.nome ILIKE ${`%${query}%`}
+      GROUP BY condominios.id, condominios.nome, condominios.apartamentos, condominios.lojas
+      ORDER BY condominios.nome ASC
+      LIMIT ${ITEMS_PER_PAGE_CONDOMINIOS} OFFSET ${offset}
+    `;
+
+    const condominios = data.rows.map((condominio) => ({
+      ...condominio,
+    }));
+
+    return condominios;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    console.error('Database Error:', errorMessage);
+    throw new Error('Failed to fetch condominiums table.');
+  }
+}
+
+
+export async function fetchCondominiosById(id: string) {
+  noStore();
+  try {
+    const data = await sql<CondominioForm>`
+        SELECT
+        condominios.id,
+        condominios.nome,
+        condominios.apartamentos,
+        condominios.lojas
+      FROM condominios
+      WHERE condominios.id = ${id};
+    `;
+
+    const condominios = data.rows.map((condominio) => ({
+      ...condominio,
+    }));
+
+    console.log(condominios); // Invoice is an empty array []
+    return condominios[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch condominios.');
+  }
+}
