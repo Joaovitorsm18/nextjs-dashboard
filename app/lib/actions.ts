@@ -20,6 +20,13 @@ const FormSchema = z.object({
     date: z.string(),
 })
 
+const FormSchemaa = z.object({
+    id: z.string(),
+    nome: z.string(),
+    apartamentos: z.string(),
+    lojas: z.string(),
+});
+
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
@@ -28,6 +35,15 @@ export type State = {
         customerId?: string[];
         amount?: string[];
         status?: string[];
+    };
+    message?: string | null;
+};
+
+export type State1 = {
+    errors?: {
+        nome?: string[];
+        apartamentos?: string[];
+        lojas?: string[];
     };
     message?: string | null;
 };
@@ -114,3 +130,73 @@ export async function deleteInvoice(id: string) {
 
 }
 
+const CreateCondominium = FormSchemaa.omit({ id: true });
+const UpdateCondominium = FormSchemaa.omit({ id: true });
+
+export async function createCondominium(prevState: State, formData: FormData) {
+    const { nome, apartamentos, lojas } = CreateCondominium.parse({
+        nome: formData.get('nome'),
+        apartamentos: formData.get('apartamentos'),
+        lojas: formData.get('lojas'),
+    });
+    try {
+        await sql`
+          INSERT INTO condominios (nome, apartamentos, lojas)
+          VALUES (${nome}, ${apartamentos}, ${lojas})
+        `;
+    } catch (error) {
+        // If a database error occurs, return a more specific error.
+        return {
+            message: 'Database Error: Failed to Create Invoice.',
+        };
+    }
+
+    // Revalidate the cache for the invoices page and redirect the user.
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+}
+
+export async function updateCondominium(
+    id: string,
+    prevState: State1,
+    formData: FormData,
+) {
+    const validatedFields = UpdateCondominium.safeParse({
+        nome: formData.get('nome'),
+        apartamentos: formData.get('apartamentos'),
+        lojas: formData.get('lojas'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update Invoice.',
+        };
+    }
+
+    const { nome, apartamentos, lojas } = validatedFields.data;
+
+    try {
+        await sql`
+        UPDATE condominios
+        SET nome = ${nome}, apartamentos = ${apartamentos}, lojas = ${lojas}
+        WHERE id = ${id}
+      `;
+    } catch (error) {
+        return { message: 'Database Error: Failed to Update Condominio.' };
+    }
+
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+}
+
+export async function deleteCondominium(id: string) {
+    try {
+        await sql`DELETE FROM condominios WHERE id = ${id}`;
+        revalidatePath('/dashboard/costumers');
+        return { message: 'Deleted condominio.' };
+    } catch (error) {
+        return { message: 'Database Error: Failed to Delete Condominio.' };
+    }
+
+}
