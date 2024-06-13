@@ -55,6 +55,7 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
+
 export type CustomersTableType = {
   id: string;
   name: string;
@@ -85,4 +86,30 @@ export type InvoiceForm = {
   customer_id: string;
   amount: number;
   status: 'pending' | 'paid';
+};
+
+export type FormattedCondominiosTable = {
+  id: string;
+  name: string;
+  apartamentos: string;
+  lojas: string;
+};
+
+export type CondominioField = {
+  id: string;
+  name: string;
+};
+
+export type CondominioForm = {
+  id: string;
+  nome: string;
+  apartamentos: string;
+  lojas: string;
+};
+
+export type CondominiosTable = {
+  id: string;
+  name: string;
+  apartamentos: string;
+  loja: string;
 };
