@@ -66,7 +66,6 @@ export default function Form({ condominios }: { condominios: CondominioField[] }
               step="0.01"
               placeholder="Loja 01, loja 02..."
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
-              required
             />
           </div>
         </div>
