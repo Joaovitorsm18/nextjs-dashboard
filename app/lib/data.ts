@@ -264,7 +264,7 @@ export async function fetchFilteredCondominiums(query: string, currentPage: numb
         condominios.apartamentos,
         condominios.lojas,
         (LENGTH(condominios.apartamentos) - LENGTH(REPLACE(condominios.apartamentos, ',', '')) + 1) AS total_apartamentos,
-        (LENGTH(condominios.lojas) - LENGTH(REPLACE(condominios.lojas, ',', '')) + 1) AS total_lojas,
+        CASE WHEN POSITION(',' IN condominios.lojas) > 0 THEN (LENGTH(condominios.lojas) - LENGTH(REPLACE(condominios.lojas, ',', '')) + 1) ELSE 0 END AS total_lojas,
         COUNT(condominios.id) OVER() AS total_condominios
       FROM condominios
       WHERE
