@@ -24,13 +24,19 @@ export default async function InvoicesTable({
                 className="mb-2 w-full rounded-md bg-white p-4"
               >
                 <div className="flex items-center justify-between border-b pb-4">
-                  <div>
-                    <div className="mb-2 flex items-center">
-                      <p>{condominios.nome}</p>
-                    </div>
-                    <p className="text-sm text-gray-500">{condominios.apartamentos}</p>
+                  <div className="mb-2 flex items-center">
+                    <p>{condominios.nome}</p>
                   </div>
-
+                </div>
+                <div className="flex justify-between py-2">
+                  <div className="flex flex-col items-center">
+                    <p className="text-sm font-medium">Apartamentos</p>
+                    <p>{condominios.total_apartamentos}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-sm font-medium">Lojas</p>
+                    <p>{condominios.total_lojas}</p>
+                  </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div className="flex justify-end gap-2">
