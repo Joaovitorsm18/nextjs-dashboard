@@ -3,7 +3,6 @@
 import { CondominioForm } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-
 import { useState, useEffect } from 'react';
 
 export default function EditCondominioForm({
@@ -11,15 +10,21 @@ export default function EditCondominioForm({
 }: {
   condominios: CondominioForm;
 }) {
-  const handleSubmit = async (event, condominios) => { // Passar condominios como parâmetro
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, condominios: CondominioForm) => {
     event.preventDefault();
 
+    const target = event.target as typeof event.target & {
+      valorConta: { value: string };
+      consumoConta: { value: string };
+      consumosApartamentosIndividuais: { value: string };
+    };
+
     const data = {
-      valorConta: event.target.valorConta.value,
-      consumoConta: event.target.consumoConta.value,
+      valorConta: target.valorConta.value,
+      consumoConta: target.consumoConta.value,
       numberOfApartments: condominios.total_apartamentos,
       numberOfLojas: condominios.total_lojas,
-      consumosApartamentosIndividuais: event.target.consumosApartamentosIndividuais.value
+      consumosApartamentosIndividuais: target.consumosApartamentosIndividuais.value
     };
 
     const response = await fetch('/process-login', {
@@ -39,7 +44,7 @@ export default function EditCondominioForm({
       const inputs = document.querySelectorAll('input[type="text"]');
       inputs.forEach((input) => {
         input.addEventListener('change', () => {
-          input.value = input.value.replace(/,/g, '.');
+          (input as HTMLInputElement).value = (input as HTMLInputElement).value.replace(/,/g, '.');
         });
       });
     };
@@ -48,10 +53,10 @@ export default function EditCondominioForm({
       const inputConta = document.querySelectorAll('input[id="valorConta"]');
       inputConta.forEach((input) => {
         input.addEventListener('change', () => {
-          let valor = input.value;
+          let valor = (input as HTMLInputElement).value;
           valor = valor.replace(/\s*R\$\s*|\s+/g, '');
           valor = valor.replace(/(\d+)\.(\d+),(\d+)/g, '$1$2.$3');
-          input.value = valor;
+          (input as HTMLInputElement).value = valor;
         });
       });
     };
