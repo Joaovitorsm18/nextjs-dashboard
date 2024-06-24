@@ -25,6 +25,7 @@ const FormSchemaa = z.object({
     nome: z.string(),
     apartamentos: z.string(),
     lojas: z.string(),
+    msg: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
@@ -44,6 +45,7 @@ export type State1 = {
         nome?: string[];
         apartamentos?: string[];
         lojas?: string[];
+        msg?: string[];
     };
     message?: string | null;
 };
@@ -134,15 +136,16 @@ const CreateCondominium = FormSchemaa.omit({ id: true });
 const UpdateCondominium = FormSchemaa.omit({ id: true });
 
 export async function createCondominium(prevState: State, formData: FormData) {
-    const { nome, apartamentos, lojas } = CreateCondominium.parse({
+    const { nome, apartamentos, lojas, msg } = CreateCondominium.parse({
         nome: formData.get('nome'),
         apartamentos: formData.get('apartamentos'),
         lojas: formData.get('lojas'),
+        msg: formData.get('msg'),
     });
     try {
         await sql`
-          INSERT INTO condominios (nome, apartamentos, lojas)
-          VALUES (${nome}, ${apartamentos}, ${lojas})
+          INSERT INTO condominios (nome, apartamentos, lojas, msg)
+          VALUES (${nome}, ${apartamentos}, ${lojas}, ${msg})
         `;
     } catch (error) {
         // If a database error occurs, return a more specific error.
@@ -152,8 +155,8 @@ export async function createCondominium(prevState: State, formData: FormData) {
     }
 
     // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/customers');
-    redirect('/dashboard/customers');
+    revalidatePath('/dashboard/condominio');
+    redirect('/dashboard/condominio');
 }
 
 export async function updateCondominium(
@@ -165,6 +168,7 @@ export async function updateCondominium(
         nome: formData.get('nome'),
         apartamentos: formData.get('apartamentos'),
         lojas: formData.get('lojas'),
+        msg: formData.get('msg'),
     });
 
     if (!validatedFields.success) {
@@ -174,20 +178,20 @@ export async function updateCondominium(
         };
     }
 
-    const { nome, apartamentos, lojas } = validatedFields.data;
+    const { nome, apartamentos, lojas, msg } = validatedFields.data;
 
     try {
         await sql`
         UPDATE condominios
-        SET nome = ${nome}, apartamentos = ${apartamentos}, lojas = ${lojas}
+        SET nome = ${nome}, apartamentos = ${apartamentos}, lojas = ${lojas}, msg = ${msg}
         WHERE id = ${id}
       `;
     } catch (error) {
         return { message: 'Database Error: Failed to Update Condominio.' };
     }
 
-    revalidatePath('/dashboard/customers');
-    redirect('/dashboard/customers');
+    revalidatePath('/dashboard/condominio');
+    redirect('/dashboard/condominio');
 }
 
 export async function deleteCondominium(id: string) {

@@ -56,7 +56,7 @@ export type InvoicesTable = {
 };
 
 
-export type CustomersTableType = {
+export type condominioTableType = {
   id: string;
   name: string;
   email: string;
@@ -66,7 +66,7 @@ export type CustomersTableType = {
   total_paid: number;
 };
 
-export type FormattedCustomersTable = {
+export type FormattedcondominioTable = {
   id: string;
   name: string;
   email: string;
@@ -105,6 +105,10 @@ export type CondominioForm = {
   nome: string;
   apartamentos: string;
   lojas: string;
+  msg: string;
+  total_apartamentos: string;
+  total_lojas: string;
+
 };
 
 export type CondominiosTable = {
@@ -112,4 +116,13 @@ export type CondominiosTable = {
   name: string;
   apartamentos: string;
   loja: string;
+};
+
+export type CondominioFormCalculo = {
+  id: string;
+  nome: string;
+  apartamentos: string;
+  lojas: string;
+  total_apartamentos: string;
+  total_lojas: string;
 };

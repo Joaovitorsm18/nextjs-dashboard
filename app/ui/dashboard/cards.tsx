@@ -9,7 +9,7 @@ import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
   collected: BanknotesIcon,
-  customers: UserGroupIcon,
+  condominio: UserGroupIcon,
   pending: ClockIcon,
   invoices: InboxIcon,
 };
@@ -18,7 +18,7 @@ export default async function CardWrapper() {
   const {
     numberOfCondominios,
     numberOfInvoices,
-    numberOfCustomers,
+    numberOfcondominio,
     totalPaidInvoices,
     totalPendingInvoices,
   } = await fetchCardData();
@@ -31,9 +31,9 @@ export default async function CardWrapper() {
       */}
       <Card title="Total Condomínios" value={numberOfCondominios} type="invoices" />
       <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
+        title="Total condominio"
+        value={numberOfcondominio}
+        type="condominio"
       />
     </>
   );
@@ -46,7 +46,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected';
+  type: 'invoices' | 'condominio' | 'pending' | 'collected';
 }) {
   const Icon = iconMap[type];
 
