@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
-  CustomersTableType,
+  condominioTableType,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
@@ -35,14 +35,14 @@ export async function fetchRevenue() {
     throw new Error('Failed to fetch revenue data.');
   }
 }
-
+/*
 export async function fetchLatestInvoices() {
   noStore();
   try {
     const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
+      SELECT invoices.amount, condominio.name, condominio.image_url, condominio.email, invoices.id
       FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
+      JOIN condominio ON invoices.customer_id = condominio.id
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -56,7 +56,7 @@ export async function fetchLatestInvoices() {
     throw new Error('Failed to fetch the latest invoices.');
   }
 }
-
+*/
 export async function fetchCardData() {
   noStore();
   try {
@@ -64,38 +64,38 @@ export async function fetchCardData() {
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
     const condominioCountPromise = sql`SELECT COUNT(*) FROM condominios`;
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
-    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    const invoiceStatusPromise = sql`SELECT
+    //const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
+    //const customerCountPromise = sql`SELECT COUNT(*) FROM condominio`;
+    /*const invoiceStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
-
+    */
     const data = await Promise.all([
       condominioCountPromise,
-      invoiceCountPromise,
-      customerCountPromise,
-      invoiceStatusPromise,
+      //invoiceCountPromise,
+      //customerCountPromise,
+      //invoiceStatusPromise,
     ]);
     const numberOfCondominios = Number(data[0].rows[0].count ?? '0');
-    const numberOfInvoices = Number(data[1].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[2].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[3].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[3].rows[0].pending ?? '0');
+    //const numberOfInvoices = Number(data[1].rows[0].count ?? '0');
+    //const numberOfcondominio = Number(data[1].rows[0].count ?? '0');
+    //const totalPaidInvoices = formatCurrency(data[3].rows[0].paid ?? '0');
+    //const totalPendingInvoices = formatCurrency(data[3].rows[0].pending ?? '0');
 
     return {
       numberOfCondominios,
-      numberOfCustomers,
-      numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
+      //numberOfcondominio,
+      //numberOfInvoices,
+      //totalPaidInvoices,
+      //totalPendingInvoices,
     };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch card data.');
   }
 }
-
+/*
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
@@ -111,14 +111,14 @@ export async function fetchFilteredInvoices(
         invoices.amount,
         invoices.date,
         invoices.status,
-        customers.name,
-        customers.email,
-        customers.image_url
+        condominio.name,
+        condominio.email,
+        condominio.image_url
       FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
+      JOIN condominio ON invoices.customer_id = condominio.id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
+        condominio.name ILIKE ${`%${query}%`} OR
+        condominio.email ILIKE ${`%${query}%`} OR
         invoices.amount::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
@@ -132,16 +132,17 @@ export async function fetchFilteredInvoices(
     throw new Error('Failed to fetch invoices.');
   }
 }
-
+*/
+/*
 export async function fetchInvoicesPages(query: string) {
   noStore();
   try {
     const count = await sql`SELECT COUNT(*)
     FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
+    JOIN condominio ON invoices.customer_id = condominio.id
     WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
+      condominio.name ILIKE ${`%${query}%`} OR
+      condominio.email ILIKE ${`%${query}%`} OR
       invoices.amount::text ILIKE ${`%${query}%`} OR
       invoices.date::text ILIKE ${`%${query}%`} OR
       invoices.status ILIKE ${`%${query}%`}
@@ -154,7 +155,7 @@ export async function fetchInvoicesPages(query: string) {
     throw new Error('Failed to fetch total number of invoices.');
   }
 }
-
+*/
 export async function fetchInvoiceById(id: string) {
   noStore();
   try {
@@ -181,58 +182,6 @@ export async function fetchInvoiceById(id: string) {
   }
 }
 
-export async function fetchCustomers() {
-  try {
-    const data = await sql<CustomerField>`
-      SELECT
-        id,
-        name
-      FROM customers
-      ORDER BY name ASC
-    `;
-
-    const customers = data.rows;
-    return customers;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
-  }
-}
-
-export async function fetchFilteredCustomers(query: string) {
-  noStore();
-  try {
-    const data = await sql<CustomersTableType>`
-		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
-		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
-	  `;
-
-    const customers = data.rows.map((customer) => ({
-      ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
-    }));
-
-    return customers;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
-  }
-}
-
 export async function fetchCondominios() {
   try {
     const data = await sql<CondominioField>`
@@ -251,7 +200,7 @@ export async function fetchCondominios() {
   }
 }
 
-const ITEMS_PER_PAGE_CONDOMINIOS = 6;
+const ITEMS_PER_PAGE_CONDOMINIOS = 10;
 export async function fetchFilteredCondominiums(query: string, currentPage: number) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE_CONDOMINIOS;
@@ -263,14 +212,28 @@ export async function fetchFilteredCondominiums(query: string, currentPage: numb
         condominios.nome,
         condominios.apartamentos,
         condominios.lojas,
-        (LENGTH(condominios.apartamentos) - LENGTH(REPLACE(condominios.apartamentos, ',', '')) + 1) AS total_apartamentos,
-        CASE WHEN POSITION(',' IN condominios.lojas) > 0 THEN (LENGTH(condominios.lojas) - LENGTH(REPLACE(condominios.lojas, ',', '')) + 1) ELSE 0 END AS total_lojas,
-        COUNT(condominios.id) OVER() AS total_condominios
+        (
+          SELECT COUNT(*)
+          FROM (
+            SELECT UNNEST(string_to_array(condominios.apartamentos, ',')) AS apartment
+          ) AS apartment_list
+        ) AS total_apartamentos,
+        (
+          SELECT COUNT(*)
+          FROM (
+            SELECT UNNEST(string_to_array(condominios.lojas, ',')) AS loja
+          ) AS loja_list
+        ) AS total_lojas,
+        COUNT(condominios.id) OVER() AS total_condominios,
+        CASE
+          WHEN condominios.msg IS NULL OR condominios.msg = '' THEN 'Não'
+          ELSE 'Sim'
+        END AS msg_status
       FROM condominios
       WHERE
-        condominios.nome ILIKE ${`%${query}%`}
-      GROUP BY condominios.id, condominios.nome, condominios.apartamentos, condominios.lojas
-      ORDER BY condominios.nome ASC
+        condominios.nome ILIKE ${'%' + query + '%'}
+      GROUP BY condominios.id, condominios.nome, condominios.apartamentos, condominios.lojas, condominios.msg
+      ORDER BY UNACCENT(LOWER(condominios.nome)) ASC
       LIMIT ${ITEMS_PER_PAGE_CONDOMINIOS} OFFSET ${offset}
     `;
 
@@ -287,17 +250,31 @@ export async function fetchFilteredCondominiums(query: string, currentPage: numb
 }
 
 
+
 export async function fetchCondominiosById(id: string) {
   noStore();
   try {
     const data = await sql<CondominioForm>`
-        SELECT
-        condominios.id,
-        condominios.nome,
-        condominios.apartamentos,
-        condominios.lojas
-      FROM condominios
-      WHERE condominios.id = ${id};
+       SELECT
+  condominios.id,
+  condominios.nome,
+  condominios.apartamentos,
+  condominios.lojas,
+  condominios.msg,
+  (
+    SELECT COUNT(*)
+    FROM (
+      SELECT UNNEST(string_to_array(condominios.apartamentos, ',')) AS apartment
+    ) AS apartment_list
+  ) AS total_apartamentos,
+  (
+    SELECT COUNT(*)
+    FROM (
+      SELECT UNNEST(string_to_array(condominios.lojas, ',')) AS loja
+    ) AS loja_list
+  ) AS total_lojas
+FROM condominios
+WHERE condominios.id = ${id};
     `;
 
     const condominios = data.rows.map((condominio) => ({
@@ -309,5 +286,21 @@ export async function fetchCondominiosById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch condominios.');
+  }
+}
+
+
+export async function fetchCondominiosPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT COUNT(*)
+    FROM condominios    
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE_CONDOMINIOS);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of condominios.');
   }
 }
