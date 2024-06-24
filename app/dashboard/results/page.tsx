@@ -1,3 +1,9 @@
+export default function Page() {
+    return (
+        <p>a</p>
+    )
+}
+
 /*
 // use client
 import { useRouter } from 'next/router';
