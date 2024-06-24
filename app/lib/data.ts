@@ -11,7 +11,6 @@ import {
   CondominioField,
   CondominioForm,
 } from './definitions';
-import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchRevenue() {
@@ -64,8 +63,11 @@ export async function fetchCardData() {
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
     const condominioCountPromise = sql`SELECT COUNT(*) FROM condominios`;
-    //const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
-    //const customerCountPromise = sql`SELECT COUNT(*) FROM condominio`;
+    const apartamentosCountPromise = sql`SELECT SUM(array_length(string_to_array(apartamentos, ','), 1)) AS count
+      FROM condominios`;
+    const lojasCountPromise = sql`SELECT SUM(array_length(string_to_array(lojas, ','), 1)) AS count
+      FROM condominios`;
+    const ultimoCadastradoPromise = sql`SELECT nome FROM condominios ORDER BY id DESC LIMIT 1`;
     /*const invoiceStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
@@ -73,20 +75,22 @@ export async function fetchCardData() {
     */
     const data = await Promise.all([
       condominioCountPromise,
-      //invoiceCountPromise,
-      //customerCountPromise,
-      //invoiceStatusPromise,
+      apartamentosCountPromise,
+      lojasCountPromise,
+      ultimoCadastradoPromise,
     ]);
     const numberOfCondominios = Number(data[0].rows[0].count ?? '0');
-    //const numberOfInvoices = Number(data[1].rows[0].count ?? '0');
-    //const numberOfcondominio = Number(data[1].rows[0].count ?? '0');
+    const numberOfApartamentos = Number(data[1].rows[0].count ?? '0');
+    const numberOfLojas = Number(data[2].rows[0].count ?? '0');
+    const ultimoCadastrado = data[3].rows[0]?.nome ?? 'N/A';
     //const totalPaidInvoices = formatCurrency(data[3].rows[0].paid ?? '0');
     //const totalPendingInvoices = formatCurrency(data[3].rows[0].pending ?? '0');
 
     return {
       numberOfCondominios,
-      //numberOfcondominio,
-      //numberOfInvoices,
+      numberOfApartamentos,
+      numberOfLojas,
+      ultimoCadastrado,
       //totalPaidInvoices,
       //totalPendingInvoices,
     };

@@ -1,22 +1,28 @@
 import {
   BanknotesIcon,
-  ClockIcon,
+  PlusCircleIcon,
   UserGroupIcon,
-  InboxIcon,
+  BuildingOfficeIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
+
 import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
   collected: BanknotesIcon,
   condominio: UserGroupIcon,
-  pending: ClockIcon,
-  invoices: InboxIcon,
+  apartamentos: BuildingOfficeIcon,
+  lojas: BuildingStorefrontIcon,
+  ultimoCondominio: PlusCircleIcon,
 };
 
 export default async function CardWrapper() {
   const {
-    numberOfCondominios
+    numberOfCondominios,
+    numberOfApartamentos,
+    numberOfLojas,
+    ultimoCadastrado,
     /*
     numberOfInvoices,
     numberOfcondominio,
@@ -29,16 +35,12 @@ export default async function CardWrapper() {
       {/*
       <Card title="Collected" value={totalPaidInvoices} type="collected" />
       <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
       */}
+
       <Card title="Total Condomínios" value={numberOfCondominios} type="condominio" />
-      {/*
-      <Card
-        title="Total condominio"
-        value={numberOfcondominio}
-        type="condominio"
-      />
-      */}
+      <Card title="Total Apartamentos" value={numberOfApartamentos} type="apartamentos" />
+      <Card title="Total Lojas" value={numberOfLojas} type="lojas" />
+      <Card title="Ultimo cadastrado" value={ultimoCadastrado} type="ultimoCondominio" />
     </>
   );
 }
@@ -50,7 +52,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'condominio' | 'pending' | 'collected';
+  type: 'condominio' | 'apartamentos' | 'lojas' | 'ultimoCondominio';
 }) {
   const Icon = iconMap[type];
 
