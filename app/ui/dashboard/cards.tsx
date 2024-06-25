@@ -32,15 +32,13 @@ export default async function CardWrapper() {
   } = await fetchCardData();
   return (
     <>
-      {/*
-      <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      */}
-
       <Card title="Total Condomínios" value={numberOfCondominios} type="condominio" />
       <Card title="Total Apartamentos" value={numberOfApartamentos} type="apartamentos" />
       <Card title="Total Lojas" value={numberOfLojas} type="lojas" />
+      {/* 
       <Card title="Ultimo cadastrado" value={ultimoCadastrado} type="ultimoCondominio" />
+      */}
+
     </>
   );
 }
