@@ -10,7 +10,9 @@ import {
   CondominiosTable,
   CondominioField,
   CondominioForm,
+  LatestCondominio,
 } from './definitions';
+import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchRevenue() {
@@ -39,9 +41,9 @@ export async function fetchLatestInvoices() {
   noStore();
   try {
     const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, condominio.name, condominio.image_url, condominio.email, invoices.id
+      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
-      JOIN condominio ON invoices.customer_id = condominio.id
+      JOIN customers ON invoices.customer_id = customers.id
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -56,6 +58,25 @@ export async function fetchLatestInvoices() {
   }
 }
 */
+export async function fetchLatestCondominio() {
+  noStore();
+  try {
+    const data = await sql<LatestCondominio>`
+      SELECT condominios.id, condominios.nome
+      FROM condominios
+      ORDER BY id DESC
+      LIMIT 7`;
+
+    const latestCondominios = data.rows.map((condominio) => ({
+      ...condominio,
+    }));
+    return latestCondominios;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch the latest condominios.');
+  }
+}
+
 export async function fetchCardData() {
   noStore();
   try {

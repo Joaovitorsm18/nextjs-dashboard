@@ -126,3 +126,8 @@ export type CondominioFormCalculo = {
   total_apartamentos: string;
   total_lojas: string;
 };
+
+export type LatestCondominio = {
+  id: string;
+  nome: string;
+};
