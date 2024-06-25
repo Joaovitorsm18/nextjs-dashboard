@@ -225,7 +225,7 @@ export async function fetchCondominios() {
   }
 }
 
-const ITEMS_PER_PAGE_CONDOMINIOS = 10;
+const ITEMS_PER_PAGE_CONDOMINIOS = 6;
 export async function fetchFilteredCondominiums(query: string, currentPage: number) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE_CONDOMINIOS;
