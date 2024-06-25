@@ -256,7 +256,7 @@ export async function fetchFilteredCondominiums(query: string, currentPage: numb
         END AS msg_status
       FROM condominios
       WHERE
-        condominios.nome ILIKE ${'%' + query + '%'}
+        UNACCENT(condominios.nome) ILIKE ${'%' + query + '%'}
       GROUP BY condominios.id, condominios.nome, condominios.apartamentos, condominios.lojas, condominios.msg
       ORDER BY UNACCENT(LOWER(condominios.nome)) ASC
       LIMIT ${ITEMS_PER_PAGE_CONDOMINIOS} OFFSET ${offset}
