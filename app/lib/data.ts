@@ -36,6 +36,59 @@ export async function fetchRevenue() {
     throw new Error('Failed to fetch revenue data.');
   }
 }
+
+export async function fetchTarifas() {
+  noStore();
+  // Add noStore() here to prevent the response from being cached.
+  // This is equivalent to in fetch(..., {cache: 'no-store'}).
+
+  try {
+    // Artificially delay a response for demo purposes.
+    // Don't do this in production :)
+
+    const residencialPromise = await sql`SELECT categoria, faixa, agua, esgoto, total 
+    FROM tarifas WHERE categoria = 'Residencial'
+    ORDER BY categoria DESC, 
+        CASE 
+            WHEN faixa ILIKE 'Fixa' THEN 0
+            WHEN faixa ILIKE '1ª%' THEN 1
+            WHEN faixa ILIKE '2ª%' THEN 2
+            WHEN faixa ILIKE '3ª%' THEN 3
+            WHEN faixa ILIKE '4ª%' THEN 4
+            WHEN faixa ILIKE '5ª%' THEN 5
+            WHEN faixa ILIKE '6ª%' THEN 6
+            ELSE 7
+        END;`;
+
+    const comercialPromise = await sql`SELECT categoria, faixa, agua, esgoto, total 
+        FROM tarifas WHERE categoria = 'Comercial'
+        ORDER BY categoria DESC, 
+            CASE 
+                WHEN faixa ILIKE 'Fixa' THEN 0
+                WHEN faixa ILIKE '1ª%' THEN 1
+                WHEN faixa ILIKE '2ª%' THEN 2
+                WHEN faixa ILIKE '3ª%' THEN 3
+                WHEN faixa ILIKE '4ª%' THEN 4
+                WHEN faixa ILIKE '5ª%' THEN 5
+                WHEN faixa ILIKE '6ª%' THEN 6
+                ELSE 7
+            END;`;
+
+    const data = await Promise.all([
+      residencialPromise,
+      comercialPromise
+    ]);
+
+    const residencial = data[0].rows;
+    const comercial = data[1].rows;
+
+    return { residencial, comercial }
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch tarifas data.');
+  }
+}
+
 /*
 export async function fetchLatestInvoices() {
   noStore();
@@ -65,7 +118,7 @@ export async function fetchLatestCondominio() {
       SELECT condominios.id, condominios.nome
       FROM condominios
       ORDER BY id DESC
-      LIMIT 7`;
+      LIMIT 11`;
 
     const latestCondominios = data.rows.map((condominio) => ({
       ...condominio,
