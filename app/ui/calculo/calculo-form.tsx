@@ -1,6 +1,6 @@
 'use client';
 
-import { CondominioForm } from '@/app/lib/definitions';
+import { CondominioForm, Resultado } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { useState, useEffect } from 'react';
@@ -10,6 +10,9 @@ export default function EditCondominioForm({
 }: {
   condominios: CondominioForm;
 }) {
+  const [resultados, setResultados] = useState<Resultado | null>(null);
+
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, condominios: CondominioForm) => {
     event.preventDefault();
 
@@ -27,16 +30,31 @@ export default function EditCondominioForm({
       consumosApartamentosIndividuais: target.consumosApartamentosIndividuais.value
     };
 
-    const response = await fetch('/process-login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    const result = await response.json();
-    console.log('Resultado do servidor:', result);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      console.log('Resultado do servidor:', result);
+      setResultados(result);  // Atualizar o estado com os resultados recebidos
+
+      // Scroll para baixo após 100 pixels do topo
+      window.scrollTo({
+        top: window.pageYOffset + 1000, // Ajuste o valor conforme necessário
+        behavior: 'smooth', // Scroll suave
+      });
+    } catch (error) {
+      console.error('Houve um problema com a requisição fetch:', error);
+    }
   };
 
   useEffect(() => {
@@ -164,16 +182,59 @@ export default function EditCondominioForm({
             </div>
           </div>
         </div>
-      </div>
-      <div className="mt-6 flex justify-end gap-4">
-        <Link
-          href="/dashboard/condominio"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link>
+
         <Button type="submit">Calcular</Button>
       </div>
+
+      {resultados && (
+        <div className="mt-8 rounded-md bg-white p-4 shadow-md">
+          <h2 className="text-lg font-semibold mb-4">Resultados</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">Faixa</th>
+                <th className="border border-gray-300 px-4 py-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">1° Faixa</td>
+                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa1}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">2° Faixa</td>
+                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa2}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">3° Faixa</td>
+                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa3}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">Condomínio</td>
+                <td className="border border-gray-300 px-4 py-2">{resultados.valorCondominio}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 className="text-lg font-semibold mt-8 mb-4">Cobrança por Apartamento</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">Apartamento</th>
+                <th className="border border-gray-300 px-4 py-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.cobrancaPorApartamento.map((apartamento, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 px-4 py-2">{Object.keys(apartamento)[0]}</td>
+                  <td className="border border-gray-300 px-4 py-2">{Object.values(apartamento)[0]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </form>
   );
 }
