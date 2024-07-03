@@ -111,6 +111,15 @@ export type CondominioForm = {
 
 };
 
+export type TarifasForm = {
+  id: string;
+  categoria: string;
+  faixa: string;
+  agua: string;
+  esgoto: string;
+  total: string;
+};
+
 export type CondominiosTable = {
   id: string;
   name: string;
@@ -130,4 +139,12 @@ export type CondominioFormCalculo = {
 export type LatestCondominio = {
   id: string;
   nome: string;
+};
+
+export type Resultado = {
+  valorFaixa1: string;
+  valorFaixa2: string;
+  valorFaixa3: string;
+  valorCondominio: string;
+  cobrancaPorApartamento: { [apartamento: string]: string }[];
 };
