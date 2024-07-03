@@ -31,7 +31,7 @@ export default function EditCondominioForm({
     };
 
     try {
-      const response = await fetch('https://back-end-6hjm.onrender.com/process-login', {
+      const response = await fetch('https://back-end-controle-de-agua.vercel.app/process-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
