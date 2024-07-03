@@ -3,7 +3,7 @@
 import { CondominioForm, Resultado } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function EditCondominioForm({
   condominios,
@@ -11,7 +11,7 @@ export default function EditCondominioForm({
   condominios: CondominioForm;
 }) {
   const [resultados, setResultados] = useState<Resultado | null>(null);
-
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, condominios: CondominioForm) => {
     event.preventDefault();
@@ -46,16 +46,16 @@ export default function EditCondominioForm({
       const result = await response.json();
       console.log('Resultado do servidor:', result);
       setResultados(result);  // Atualizar o estado com os resultados recebidos
-
-      // Scroll para baixo após 100 pixels do topo
-      window.scrollTo({
-        top: window.pageYOffset + 1000, // Ajuste o valor conforme necessário
-        behavior: 'smooth', // Scroll suave
-      });
     } catch (error) {
       console.error('Houve um problema com a requisição fetch:', error);
     }
   };
+
+  useEffect(() => {
+    if (resultados && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [resultados]); // Executar o scroll quando 'resultados' for atualizado
 
   useEffect(() => {
     const substituirVirgulasPorPontos = () => {
@@ -187,7 +187,7 @@ export default function EditCondominioForm({
       </div>
 
       {resultados && (
-        <div className="mt-8 rounded-md bg-white p-4 shadow-md">
+        <div ref={resultRef} className="mt-8 rounded-md bg-white p-4 shadow-md">
           <h2 className="text-lg font-semibold mb-4">Resultados</h2>
           <table className="w-full border-collapse border border-gray-300">
             <thead>
