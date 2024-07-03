@@ -31,7 +31,7 @@ export default function EditCondominioForm({
     };
 
     try {
-      const response = await fetch('https://back-end-controle-de-agua.vercel.app/process-login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
