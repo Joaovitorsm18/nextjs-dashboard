@@ -27,11 +27,13 @@ export default function EditCondominioForm({
       consumoConta: target.consumoConta.value,
       numberOfApartments: condominios.total_apartamentos,
       numberOfLojas: condominios.total_lojas,
-      consumosApartamentosIndividuais: target.consumosApartamentosIndividuais.value
+      consumosApartamentosIndividuais: target.consumosApartamentosIndividuais.value,
+      apartamentos: condominios.apartamentos
     };
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+        //const response = await fetch('http://localhost:3001/process-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,18 +199,42 @@ export default function EditCondominioForm({
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">1° Faixa</td>
-                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa1}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">2° Faixa</td>
-                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa2}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">3° Faixa</td>
-                <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa3}</td>
-              </tr>
+              {resultados.valorFaixa1 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">1° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa1}</td>
+                </tr>
+              )}
+              {resultados.valorFaixa2 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">2° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa2}</td>
+                </tr>
+              )}
+              {resultados.valorFaixa3 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">3° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa3}</td>
+                </tr>
+              )}
+              {resultados.valorFaixa4 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">4° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa4}</td>
+                </tr>
+              )}
+              {resultados.valorFaixa5 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">5° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa5}</td>
+                </tr>
+              )}
+              {resultados.valorFaixa6 && (
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">6° Faixa</td>
+                  <td className="border border-gray-300 px-4 py-2">{resultados.valorFaixa6}</td>
+                </tr>
+              )}
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Condomínio</td>
                 <td className="border border-gray-300 px-4 py-2">{resultados.valorCondominio}</td>
