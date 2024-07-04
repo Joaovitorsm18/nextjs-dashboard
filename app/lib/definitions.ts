@@ -145,6 +145,9 @@ export type Resultado = {
   valorFaixa1: string;
   valorFaixa2: string;
   valorFaixa3: string;
+  valorFaixa4: string;
+  valorFaixa5: string;
+  valorFaixa6: string;
   valorCondominio: string;
   cobrancaPorApartamento: { [apartamento: string]: string }[];
 };
