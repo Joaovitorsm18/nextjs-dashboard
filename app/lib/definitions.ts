@@ -150,4 +150,5 @@ export type Resultado = {
   valorFaixa6: string;
   valorCondominio: string;
   cobrancaPorApartamento: { [apartamento: string]: string }[];
+  cobrancaPorLoja: { [loja: string]: string }[];
 };
