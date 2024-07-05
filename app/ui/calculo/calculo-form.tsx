@@ -28,12 +28,13 @@ export default function EditCondominioForm({
       numberOfApartments: condominios.total_apartamentos,
       numberOfLojas: condominios.total_lojas,
       consumosApartamentosIndividuais: target.consumosApartamentosIndividuais.value,
-      apartamentos: condominios.apartamentos
+      apartamentos: condominios.apartamentos,
+      lojas: condominios.lojas
     };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
-        //const response = await fetch('http://localhost:3001/process-login', {
+      //const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+      const response = await fetch('http://localhost:3001/process-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +243,7 @@ export default function EditCondominioForm({
             </tbody>
           </table>
 
-          <h2 className="text-lg font-semibold mt-8 mb-4">Cobrança por Apartamento</h2>
+          <h2 className="text-lg font-semibold mt-8 mb-4">Cobrança por Unidades</h2>
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr>
@@ -258,6 +259,24 @@ export default function EditCondominioForm({
                 </tr>
               ))}
             </tbody>
+            {resultados.cobrancaPorLoja && (
+              <>
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2">Lojas</th>
+                    <th className="border border-gray-300 px-4 py-2">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resultados.cobrancaPorLoja.map((loja, index) => (
+                    <tr key={index}>
+                      <td className="border border-gray-300 px-4 py-2">{Object.keys(loja)[0]}</td>
+                      <td className="border border-gray-300 px-4 py-2">{Object.values(loja)[0]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </>
+            )}
           </table>
         </div>
       )}
