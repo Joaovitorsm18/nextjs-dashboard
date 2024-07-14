@@ -39,8 +39,8 @@ export default function EditCondominioForm({
     };
 
     try {
-      //const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
-      const response = await fetch('http://localhost:3001/process-login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+        //const response = await fetch('http://localhost:3001/process-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
