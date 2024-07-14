@@ -1,6 +1,9 @@
 // This file contains type definitions for your data.
 // It describes the shape of the data, and what data type each property should accept.
 // For simplicity of teaching, we're manually defining these types.
+
+import { string } from "zod";
+
 // However, these types are generated automatically if you're using an ORM such as Prisma.
 export type User = {
   id: string;
@@ -152,4 +155,28 @@ export type Resultado = {
   cobrancaPorApartamento: { [apartamento: string]: string }[];
   cobrancaPorLoja: { [loja: string]: string }[];
   Erro: string;
+  taxaFixa: string;
+  consumosApartamentos: string[];
+  consumoApartamentosPrimeirafaixa: string[];
+  resultadoApartamentosPrimeirafaixa: string[];
+  consumoApartamentosSegundafaixa: string[];
+  resultadoApartamentosSegundafaixa: string[];
+  consumoApartamentosTerceirafaixa: string[];
+  resultadoApartamentosTerceirafaixa: string[];
+  consumoApartamentosQuartafaixa: string[];
+  resultadoApartamentosQuartafaixa: string[];
+  consumoApartamentosQuintafaixa: string[];
+  resultadoApartamentosQuintafaixa: string[];
+  taxaFixaLoja: string;
+  consumosLoja: string[];
+  consumoLojaPrimeirafaixa: string[];
+  resultadoLojaPrimeirafaixa: string[];
+  consumoLojaSegundafaixa: string[];
+  resultadoLojaSegundafaixa: string[];
+  consumoLojaTerceirafaixa: string[];
+  resultadoLojaTerceirafaixa: string[];
+  consumoLojaQuartafaixa: string[];
+  resultadoLojaQuartafaixa: string[];
+  consumoLojaQuintafaixa: string[];
+  resultadoLojaQuintafaixa: string[];
 };
