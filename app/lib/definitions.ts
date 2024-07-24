@@ -145,6 +145,8 @@ export type LatestCondominio = {
 };
 
 export type Resultado = {
+  valorConta: string;
+  consumoConta: string;
   valorFaixa1: string;
   valorFaixa2: string;
   valorFaixa3: string;
@@ -179,4 +181,11 @@ export type Resultado = {
   resultadoLojaQuartafaixa: string[];
   consumoLojaQuintafaixa: string[];
   resultadoLojaQuintafaixa: string[];
+};
+
+export type HistoricoForm = {
+  id: number;
+  condominio_id: number;
+  data: string;
+  resultado: any;
 };
