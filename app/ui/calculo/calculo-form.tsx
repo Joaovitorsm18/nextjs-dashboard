@@ -7,6 +7,9 @@ import { useState, useEffect, useRef } from 'react';
 import Modal from './modal-erro';
 import ModalDetalhes from './Modal';
 import { EyeIcon } from '@heroicons/react/24/outline';
+import { createHistoricoCondominium } from '@/app/lib/actions'
+import DateSelector from './dateselector';
+import SuccessNotification from './SuccessNotification';
 
 export default function EditCondominioForm({
   condominios,
@@ -17,7 +20,10 @@ export default function EditCondominioForm({
   const [error, setError] = useState<string | null>(null); // Estado para o erro
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
   const [isModalDetalhesOpen, setIsModalDetalhesOpen] = useState(false); // Estado para controlar o modal
+  const [isModalDateOpen, setIsModalDateOpen] = useState(false); // Estado para controlar o modal
   const resultRef = useRef<HTMLDivElement | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, condominios: CondominioForm) => {
     event.preventDefault();
@@ -68,6 +74,47 @@ export default function EditCondominioForm({
       setIsModalOpen(true);
     }
   };
+
+  const handleDateSelected = (date: string) => {
+    setSelectedDate(date);
+    setIsModalDateOpen(false);
+  };
+
+  const handleSave = async (date: string) => {
+    if (resultados && date) {
+      console.log('Data selecionada:', date);
+      console.log('Resultados:', resultados);
+
+      const formData = new FormData();
+      formData.append('condominio_id', condominios.id);
+      formData.append('data', date);
+      formData.append('resultado', JSON.stringify(resultados));
+
+      try {
+        const result = await createHistoricoCondominium(null, formData);
+        console.log('Resultado da API:', result);
+
+        if (result?.message) {
+          setError(result.message);
+          setIsModalOpen(true);
+        } else if (result?.status === 'success') {
+          setSuccessMessage('Histórico salvo com sucesso!');
+        } else {
+          setError('Houve um problema ao salvar o histórico.');
+          setIsModalOpen(true);
+        }
+      } catch (error) {
+        console.error('Erro ao salvar histórico:', error);
+        setError('Houve um problema ao salvar o histórico.');
+        setIsModalOpen(true);
+      }
+    }
+  };
+
+  const handleNotificationClose = () => {
+    setSuccessMessage(null);
+  };
+
 
   useEffect(() => {
     if (resultados && resultRef.current) {
@@ -332,15 +379,24 @@ export default function EditCondominioForm({
               Voltar
             </Link>
             <Link href={`/dashboard/calculo/${condominios.id}/calcular`} className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50">Calcular Novamente</Link>
-            <button
-              type="button"
-              onClick={() => setIsModalDetalhesOpen(true)}
-              className="flex h-10 items-center rounded-lg bg-green-500 px-4 text-sm font-medium text-white transition-colors hover:bg-green-400"
-            >
+            <Button onClick={() => setIsModalDateOpen(true)} className="flex h-10 items-center rounded-lg bg-green-500 px-4 text-sm font-medium text-white transition-colors hover:bg-green-400">
               Salvar
-            </button>
+            </Button>
           </div>
-
+          {/* Modal de Seleção de Data */}
+          <DateSelector
+            isOpen={isModalDateOpen}
+            onClose={() => setIsModalDateOpen(false)}
+            onSelectDate={handleDateSelected}
+            onSave={handleSave} // Passe a função handleSave
+          />
+          {/* Notificação de Sucesso */}
+          {successMessage && (
+            <SuccessNotification
+              message={successMessage}
+              onClose={handleNotificationClose}
+            />
+          )}
           <ModalDetalhes isOpen={isModalDetalhesOpen} onClose={() => setIsModalDetalhesOpen(false)}>
             <h2 className="text-xl font-semibold mt-8 mb-6 text-center">Cobrança por Unidades</h2>
             <div className="overflow-x-auto">
