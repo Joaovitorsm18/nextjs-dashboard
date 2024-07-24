@@ -62,6 +62,9 @@ export default async function InvoicesTable({
                 <th scope="col" className="px-3 py-5 font-medium">
                   Particularidades
                 </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Histótico
+                </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
                 </th>
@@ -86,6 +89,11 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {condominios.msg_status}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <Link href={`/dashboard/historico/${condominios.id}/calcular`} className="flex items-center gap-3">
+                      Ver histórico
+                    </Link>
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
