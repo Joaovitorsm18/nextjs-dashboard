@@ -1,18 +1,12 @@
 import { sql } from '@vercel/postgres';
 import {
-  CustomerField,
-  condominioTableType,
   InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
-  User,
   Revenue,
-  CondominiosTable,
   CondominioField,
   CondominioForm,
   LatestCondominio,
+  HistoricoForm,
 } from './definitions';
-import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchRevenue() {
@@ -380,5 +374,30 @@ export async function fetchCondominiosPages(query: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of condominios.');
+  }
+}
+
+export async function fetchHistoricosyId(id: string) {
+  noStore();
+  try {
+    const data = await sql<HistoricoForm>`
+       SELECT
+          historicoresultados.id,
+          historicoresultados.condominio_id,
+          historicoresultados.data,
+          historicoresultados.resultado
+       FROM historicoresultados
+       WHERE historicoresultados.condominio_id = ${id};
+    `;
+
+    const historicos = data.rows.map((historico) => ({
+      ...historico,
+    }));
+
+    console.log(historicos); // Deve mostrar um array de objetos
+    return historicos; // Retorne o array completo, não apenas o primeiro item
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch historico.');
   }
 }
