@@ -28,8 +28,16 @@ const FormSchemaa = z.object({
     msg: z.string(),
 });
 
+const FormSchemaaa = z.object({
+    id: z.string(),
+    condominio_id: z.string(),
+    data: z.string(),
+    resultado: z.string()
+});
+
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
 
 export type State = {
     errors?: {
@@ -134,6 +142,8 @@ export async function deleteInvoice(id: string) {
 
 const CreateCondominium = FormSchemaa.omit({ id: true });
 const UpdateCondominium = FormSchemaa.omit({ id: true });
+const CreateHistoricoCondominium = FormSchemaaa.omit({ id: true });
+
 
 export async function createCondominium(prevState: State, formData: FormData) {
     const { nome, apartamentos, lojas, msg } = CreateCondominium.parse({
@@ -203,4 +213,35 @@ export async function deleteCondominium(id: string) {
         return { message: 'Database Error: Failed to Delete Condominio.' };
     }
 
+}
+
+export async function createHistoricoCondominium(prevState: any, formData: FormData) {
+    const { condominio_id, data, resultado } = CreateHistoricoCondominium.parse({
+        condominio_id: formData.get('condominio_id'),
+        data: formData.get('data'),
+        resultado: formData.get('resultado'),
+    });
+
+    // Formatar a data para o formato YYYY-MM-DD
+    const formattedDate = new Date(data).toISOString().split('T')[0];
+
+    try {
+        await sql`
+          INSERT INTO HistoricoResultados (condominio_id, data, resultado)
+          VALUES (${condominio_id}, ${formattedDate}, ${resultado})
+        `;
+    } catch (error) {
+        // If a database error occurs, return a more specific error.
+        return {
+            message: 'Database Error: Failed to Create Historico.',
+        };
+    }
+
+    // Revalidate the cache for the invoices page and redirect the user.
+    revalidatePath('/dashboard/condominio');
+
+    // Return success status
+    return {
+        status: 'success',
+    };
 }
