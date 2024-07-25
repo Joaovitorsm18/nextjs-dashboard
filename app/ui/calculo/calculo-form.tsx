@@ -7,9 +7,10 @@ import { useState, useEffect, useRef } from 'react';
 import Modal from './modal-erro';
 import ModalDetalhes from './Modal';
 import { EyeIcon } from '@heroicons/react/24/outline';
-import { createHistoricoCondominium } from '@/app/lib/actions'
+import { createHistoricoCondominium, replaceHistoricoCondominium } from '@/app/lib/actions'
 import DateSelector from './dateselector';
 import SuccessNotification from './SuccessNotification';
+import ConfirmationModal from './modal-confirmacao';
 
 export default function EditCondominioForm({
   condominios,
@@ -24,6 +25,9 @@ export default function EditCondominioForm({
   const resultRef = useRef<HTMLDivElement | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [existingId, setExistingId] = useState<string | null>(null);
+  const [isModalConfirmacaoOpen, setIsModalConfirmacaoOpenn] = useState(false); // Estado para controlar o modal
+
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, condominios: CondominioForm) => {
     event.preventDefault();
@@ -45,8 +49,8 @@ export default function EditCondominioForm({
     };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
-        //const response = await fetch('http://localhost:3001/process-login', {
+      //const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+      const response = await fetch('http://localhost:3001/process-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,9 +98,13 @@ export default function EditCondominioForm({
         const result = await createHistoricoCondominium(null, formData);
         console.log('Resultado da API:', result);
 
-        if (result?.message) {
-          setError(result.message);
-          setIsModalOpen(true);
+        if (result?.status === 'exists') {
+          // Se já existir um histórico, abre o modal de confirmação
+          setExistingId(result.existingId); // Armazenar o ID existente
+          setIsModalConfirmacaoOpenn(true);
+          setSelectedDate(date);
+          setSuccessMessage(null); // Limpar mensagem de sucesso se houver
+          setError(null); // Limpar mensagem de erro se houver
         } else if (result?.status === 'success') {
           setSuccessMessage('Histórico salvo com sucesso!');
         } else {
@@ -109,6 +117,36 @@ export default function EditCondominioForm({
         setIsModalOpen(true);
       }
     }
+  };
+  const handleConfirmReplace = async () => {
+    if (resultados && selectedDate && existingId) {
+      const formData = new FormData();
+      formData.append('condominio_id', condominios.id);
+      formData.append('data', selectedDate);
+      formData.append('resultado', JSON.stringify(resultados));
+
+      try {
+        const result = await replaceHistoricoCondominium(existingId, formData); // Usar o ID existente
+        console.log('Resultado da API:', result);
+
+        if (result?.status === 'success') {
+          setSuccessMessage('Histórico substituído com sucesso!');
+          setIsModalConfirmacaoOpenn(false); // Fechar o modal de confirmação
+        } else {
+          setError('Houve um problema ao substituir o histórico.');
+          setIsModalConfirmacaoOpenn(false);
+          setIsModalOpen(true);
+        }
+      } catch (error) {
+        console.error('Erro ao substituir histórico:', error);
+        setError('Houve um problema ao substituir o histórico.');
+        setIsModalConfirmacaoOpenn(false);
+        setIsModalOpen(true);
+      }
+    }
+  };
+  const handleCancelReplace = () => {
+    setIsModalConfirmacaoOpenn(false);
   };
 
   const handleNotificationClose = () => {
@@ -397,6 +435,13 @@ export default function EditCondominioForm({
               onClose={handleNotificationClose}
             />
           )}
+          {/* Modal de Confirmação */}
+          <ConfirmationModal
+            isOpen={isModalConfirmacaoOpen}
+            onClose={handleCancelReplace}
+            onConfirm={handleConfirmReplace}
+            onCancel={handleCancelReplace}
+          />
           <ModalDetalhes isOpen={isModalDetalhesOpen} onClose={() => setIsModalDetalhesOpen(false)}>
             <h2 className="text-xl font-semibold mt-8 mb-6 text-center">Cobrança por Unidades</h2>
             <div className="overflow-x-auto">

@@ -224,24 +224,83 @@ export async function createHistoricoCondominium(prevState: any, formData: FormD
 
     // Formatar a data para o formato YYYY-MM-DD
     const formattedDate = new Date(data).toISOString().split('T')[0];
+    const dataMes = new Date(data).toISOString().slice(0, 7); // Formato YYYY-MM
 
     try {
-        await sql`
-          INSERT INTO HistoricoResultados (condominio_id, data, resultado)
-          VALUES (${condominio_id}, ${formattedDate}, ${resultado})
-        `;
+        // Verificar se já existe um registro para o mesmo mês e ano
+        const result = await sql`
+          SELECT id FROM HistoricoResultados
+          WHERE condominio_id = ${condominio_id}
+          AND to_char(data, 'YYYY-MM') = ${dataMes}`;
+
+        const existing = result.rows; // Acesso aos resultados da consulta
+
+        if (existing.length > 0) {
+            // Se existir, retorna a informação de que já existe uma entrada
+            return {
+                status: 'exists',
+                message: 'Já existe um histórico para este mês. Deseja substituir?',
+                existingId: existing[0].id
+            };
+        } else {
+            // Se não existir, salva o novo histórico
+            await sql`
+              INSERT INTO HistoricoResultados (condominio_id, data, resultado)
+              VALUES (${condominio_id}, ${formattedDate}, ${resultado})
+            `;
+            // Revalidar o cache para a página de condomínios e redirecionar o usuário.
+            revalidatePath('/dashboard/condominio');
+            // Retornar status de sucesso
+            return {
+                status: 'success',
+            };
+        }
     } catch (error) {
-        // If a database error occurs, return a more specific error.
+        // Se ocorrer um erro no banco de dados, retornar um erro específico.
         return {
             message: 'Database Error: Failed to Create Historico.',
         };
     }
+}
 
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/condominio');
+export async function replaceHistoricoCondominium(existingId: string, formData: FormData) {
+    const { data, resultado } = CreateHistoricoCondominium.parse({
+        condominio_id: formData.get('condominio_id'),
+        data: formData.get('data'),
+        resultado: formData.get('resultado'),
+    });
 
-    // Return success status
-    return {
-        status: 'success',
-    };
+    // Formatar a data para o formato YYYY-MM-DD
+    const formattedDate = new Date(data).toISOString().split('T')[0];
+
+    try {
+        // Substituir o histórico existente
+        await sql`
+          UPDATE HistoricoResultados
+          SET data = ${formattedDate}, resultado = ${resultado}
+          WHERE id = ${existingId}
+        `;
+        // Revalidar o cache para a página de condomínios e redirecionar o usuário.
+        revalidatePath('/dashboard/condominio');
+        // Retornar status de sucesso
+        return {
+            status: 'success',
+        };
+    } catch (error) {
+        // Se ocorrer um erro no banco de dados, retornar um erro específico.
+        return {
+            message: 'Database Error: Failed to Replace Historico.',
+        };
+    }
+}
+
+export async function deleteHistorico(id: string) {
+    try {
+        await sql`DELETE FROM HistoricoResultados WHERE id = ${id}`;
+        revalidatePath('/dashboard/costumers');
+        return { message: 'Deleted condominio.' };
+    } catch (error) {
+        return { message: 'Database Error: Failed to Delete histórico.' };
+    }
+
 }
